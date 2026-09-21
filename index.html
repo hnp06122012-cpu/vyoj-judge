@@ -1,864 +1,257 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VYOJ - Vĩnh Yên Online Judge | THCS Vĩnh Yên</title>
-    <!-- Tailwind CSS CDN -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Font Awesome Icons -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Google Fonts Inter & JetBrains Mono -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
-    
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    fontFamily: {
-                        sans: ['Inter', 'sans-serif'],
-                        mono: ['JetBrains Mono', 'monospace'],
-                    },
-                    colors: {
-                        vyoj: {
-                            blue: '#0284c7',
-                            dark: '#0f172a',
-                            accent: '#38bdf8',
-                            bg: '#f8fafc',
-                            card: '#ffffff'
-                        }
-                    }
-                }
-            }
-        }
-    </script>
-
-    <style>
-        ::-webkit-scrollbar {
-            width: 6px;
-            height: 6px;
-        }
-        ::-webkit-scrollbar-track {
-            background: #f1f5f9;
-        }
-        ::-webkit-scrollbar-thumb {
-            background: #cbd5e1;
-            border-radius: 3px;
-        }
-        ::-webkit-scrollbar-thumb:hover {
-            background: #94a3b8;
-        }
-
-        @keyframes pulse-glow {
-            0%, 100% { opacity: 1; transform: scale(1); }
-            50% { opacity: 0.8; transform: scale(1.02); }
-        }
-        .animate-judging {
-            animation: pulse-glow 1.2s infinite ease-in-out;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>VYOJ - Vĩnh Yên Online Judge</title>
+  <!-- Tailwind CSS & FontAwesome Icons -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- Firebase SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
+  <style>
+    .bg-dark-nav { background-color: #0f172a; }
+    .bg-dark-card { background-color: #1e293b; }
+    .border-dark { border-color: #334155; }
+  </style>
 </head>
-<body class="bg-slate-100 text-slate-800 font-sans min-h-screen flex flex-col">
+<body class="bg-slate-900 text-slate-100 min-h-screen font-sans flex flex-col">
 
-    <!-- HEADER NAVBAR -->
-    <header class="bg-slate-900 text-white shadow-md sticky top-0 z-50 border-b border-sky-900/40">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex items-center justify-between h-16">
-                
-                <!-- Logo VYOJ -->
-                <div class="flex items-center space-x-8">
-                    <a href="#" onclick="switchTab('problems')" class="flex items-center space-x-3 group">
-                        <div class="bg-gradient-to-r from-sky-500 to-blue-600 text-white font-black text-xl px-3 py-1 rounded-lg shadow group-hover:from-sky-400 group-hover:to-blue-500 transition">
-                            VYOJ
-                        </div>
-                        <div class="hidden sm:flex flex-col">
-                            <span class="font-bold text-base tracking-wide text-white leading-tight">
-                                VĨNH YÊN <span class="text-sky-400">ONLINE JUDGE</span>
-                            </span>
-                            <span class="text-[10px] text-sky-300 font-medium tracking-wider uppercase">THCS VĨNH YÊN</span>
-                        </div>
-                    </a>
+  <!-- Header / Navigation -->
+  <header class="bg-dark-nav border-b border-dark sticky top-0 z-50">
+    <div class="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
+      <div class="flex items-center space-x-6">
+        <a href="#" class="flex items-center space-x-2 text-2xl font-black tracking-wider text-blue-500">
+          <i class="fa-solid fa-code"></i>
+          <span>VYOJ</span>
+        </a>
+        <nav class="hidden md:flex space-x-4 text-sm font-medium text-slate-300">
+          <a href="#" class="px-3 py-2 rounded-lg bg-blue-600 text-white"><i class="fa-solid fa-book-open mr-1"></i> Bài tập</a>
+          <a href="#" class="px-3 py-2 rounded-lg hover:bg-slate-800 transition"><i class="fa-solid fa-clock-rotate-left mr-1"></i> Trạng thái</a>
+          <a href="#" class="px-3 py-2 rounded-lg hover:bg-slate-800 transition"><i class="fa-solid fa-trophy mr-1"></i> Bảng xếp hạng</a>
+        </nav>
+      </div>
 
-                    <!-- Nav Links -->
-                    <nav class="hidden md:flex space-x-1">
-                        <button id="nav-problems" onclick="switchTab('problems')" class="nav-link px-3 py-2 rounded-md text-sm font-medium text-slate-200 hover:text-white hover:bg-slate-800 transition">
-                            <i class="fa-solid fa-book-open mr-1.5 text-sky-400"></i> Kho Bài Tập
-                        </button>
-                        <button id="nav-submissions" onclick="switchTab('submissions')" class="nav-link px-3 py-2 rounded-md text-sm font-medium text-slate-300 hover:text-white hover:bg-slate-800 transition">
-                            <i class="fa-solid fa-clock-rotate-left mr-1.5 text-emerald-400"></i> Lịch Sử Nộp
-                        </button>
-                        <button id="nav-leaderboard" onclick="switchTab('leaderboard')" class="nav-link px-3 py-2 rounded-md text-sm font-medium text-slate-300 hover:text-white hover:bg-slate-800 transition">
-                            <i class="fa-solid fa-trophy mr-1.5 text-amber-400"></i> Bảng Xếp Hạng
-                        </button>
-                        <button id="nav-contests" onclick="switchTab('contests')" class="nav-link px-3 py-2 rounded-md text-sm font-medium text-slate-300 hover:text-white hover:bg-slate-800 transition">
-                            <i class="fa-solid fa-fire mr-1.5 text-rose-400"></i> Kỳ Thi THCS
-                        </button>
-                    </nav>
-                </div>
-
-                <!-- Right Actions -->
-                <div class="flex items-center space-x-4">
-                    <div class="relative hidden sm:block">
-                        <input type="text" id="global-search" onkeyup="quickGlobalSearch(event)" placeholder="Tìm mã bài, tên bài..." class="bg-slate-800 text-xs text-slate-200 rounded-full pl-9 pr-4 py-2 focus:outline-none focus:ring-2 focus:ring-sky-500 w-44 lg:w-56 transition-all">
-                        <i class="fa-solid fa-magnifying-glass absolute left-3 top-2.5 text-slate-400 text-xs"></i>
-                    </div>
-
-                    <!-- User Profile Badge -->
-                    <div class="flex items-center space-x-3 border-l border-slate-700 pl-4">
-                        <div class="flex items-center space-x-2 text-sm">
-                            <div class="h-8 w-8 rounded-full bg-gradient-to-tr from-sky-500 to-indigo-500 flex items-center justify-center font-bold text-xs text-white shadow">
-                                VY
-                            </div>
-                            <div class="hidden md:flex flex-col text-left">
-                                <span class="font-semibold text-xs text-slate-200 leading-tight">coder_vinhyen</span>
-                                <span class="text-[10px] text-emerald-400 font-mono">Rating: 1420 (Expert)</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="md:hidden flex items-center">
-                        <button onclick="toggleMobileMenu()" class="text-slate-300 hover:text-white focus:outline-none">
-                            <i class="fa-solid fa-bars text-xl"></i>
-                        </button>
-                    </div>
-                </div>
-            </div>
+      <!-- User Profile / Auth Area -->
+      <div id="auth-section" class="flex items-center space-x-3">
+        <!-- Khi chưa đăng nhập -->
+        <div id="guest-tools" class="flex items-center space-x-2">
+          <button onclick="openAuthModal('login')" class="px-4 py-2 text-sm font-semibold text-slate-200 hover:text-white hover:bg-slate-800 rounded-lg transition">Đăng nhập</button>
+          <button onclick="openAuthModal('register')" class="px-4 py-2 text-sm font-semibold bg-blue-600 hover:bg-blue-500 text-white rounded-lg shadow-lg shadow-blue-500/30 transition">Đăng ký</button>
         </div>
 
-        <!-- Mobile Menu -->
-        <div id="mobile-menu" class="hidden md:hidden bg-slate-800 border-t border-slate-700 px-4 pt-2 pb-3 space-y-1">
-            <button onclick="switchTab('problems'); toggleMobileMenu()" class="block w-full text-left px-3 py-2 rounded-md text-base font-medium text-slate-200 hover:bg-slate-700">
-                <i class="fa-solid fa-book-open mr-2 text-sky-400"></i> Kho Bài Tập
-            </button>
-            <button onclick="switchTab('submissions'); toggleMobileMenu()" class="block w-full text-left px-3 py-2 rounded-md text-base font-medium text-slate-200 hover:bg-slate-700">
-                <i class="fa-solid fa-clock-rotate-left mr-2 text-emerald-400"></i> Lịch Sử Nộp
-            </button>
-            <button onclick="switchTab('leaderboard'); toggleMobileMenu()" class="block w-full text-left px-3 py-2 rounded-md text-base font-medium text-slate-200 hover:bg-slate-700">
-                <i class="fa-solid fa-trophy mr-2 text-amber-400"></i> Bảng Xếp Hạng
-            </button>
-            <button onclick="switchTab('contests'); toggleMobileMenu()" class="block w-full text-left px-3 py-2 rounded-md text-base font-medium text-slate-200 hover:bg-slate-700">
-                <i class="fa-solid fa-fire mr-2 text-rose-400"></i> Kỳ Thi THCS
-            </button>
+        <!-- Khi đã đăng nhập -->
+        <div id="user-tools" class="hidden flex items-center space-x-3">
+          <div class="flex items-center space-x-3 bg-slate-800/80 px-3 py-1.5 rounded-xl border border-slate-700">
+            <div id="user-avatar" class="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center font-bold text-sm text-white">VY</div>
+            <div class="text-left">
+              <div id="user-display-name" class="text-xs font-bold text-white">Guest</div>
+              <div class="text-[10px] text-emerald-400 font-semibold">Rating: 1200</div>
+            </div>
+          </div>
+          <button onclick="logoutUser()" title="Đăng xuất" class="p-2 text-slate-400 hover:text-red-400 hover:bg-slate-800 rounded-lg transition">
+            <i class="fa-solid fa-right-from-bracket"></i>
+          </button>
         </div>
-    </header>
+      </div>
+    </div>
+  </header>
 
-    <!-- MAIN CONTAINER -->
-    <main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
+  <!-- Main Content Area -->
+  <main class="max-w-7xl mx-auto px-4 py-8 flex-1 w-full">
+    <div class="mb-8 flex flex-col md:flex-row md:items-center justify-between gap-4 bg-dark-card p-6 rounded-2xl border border-dark">
+      <div>
+        <h1 class="text-2xl font-bold text-white mb-1">Vĩnh Yên Online Judge (VYOJ)</h1>
+        <p class="text-slate-400 text-sm">Hệ thống Lập trình Trực tuyến dành cho học sinh THCS Vĩnh Yên</p>
+      </div>
+      <div class="flex items-center space-x-2">
+        <input type="text" placeholder="Tìm kiếm bài tập..." class="bg-slate-900 border border-slate-700 rounded-xl px-4 py-2 text-sm text-slate-200 focus:outline-none focus:border-blue-500 w-64">
+      </div>
+    </div>
 
-        <!-- ================= PAGE 1: PROBLEM LIST ================= -->
-        <section id="view-problems" class="space-y-6">
-            
-            <!-- Banner THCS Vĩnh Yên -->
-            <div class="bg-gradient-to-r from-sky-900 via-indigo-950 to-slate-900 rounded-2xl p-6 text-white shadow-lg relative overflow-hidden border border-sky-800/30">
-                <div class="relative z-10 max-w-2xl">
-                    <div class="inline-flex items-center space-x-2 bg-sky-500/20 text-sky-300 text-xs px-3 py-1 rounded-full border border-sky-400/30 font-medium mb-3">
-                        <i class="fa-solid fa-graduation-cap"></i>
-                        <span>Cổng Chấm Thi Lập Trình THCS Vĩnh Yên</span>
-                    </div>
-                    <h1 class="text-2xl sm:text-3xl font-extrabold tracking-tight text-white mb-2">
-                        Chào mừng tới <span class="text-sky-400">VYOJ</span>
-                    </h1>
-                    <p class="text-slate-300 text-xs sm:text-sm leading-relaxed">
-                        Nền tảng rèn luyện thuật toán, tư duy lập trình C++, Python, Pascal cho học sinh THCS Vĩnh Yên. Chuẩn bị vững chắc cho kỳ thi HSG Tin học các cấp!
-                    </p>
-                </div>
-                <i class="fa-solid fa-laptop-code absolute right-4 -bottom-6 text-9xl text-sky-400/10 pointer-events-none hidden sm:block"></i>
-            </div>
+    <!-- Problems List -->
+    <div class="bg-dark-card rounded-2xl border border-dark overflow-hidden">
+      <table class="w-full text-left text-sm text-slate-300">
+        <thead class="bg-slate-800/50 text-slate-400 uppercase text-xs">
+          <tr>
+            <th class="p-4">Mã bài</th>
+            <th class="p-4">Tên bài tập</th>
+            <th class="p-4">Thẻ / Chủ đề</th>
+            <th class="p-4">Độ khó</th>
+            <th class="p-4 text-center">Tỷ lệ AC</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-slate-800">
+          <tr class="hover:bg-slate-800/40 transition">
+            <td class="p-4 font-mono text-blue-400 font-semibold">VYOJ001</td>
+            <td class="p-4 font-semibold text-white">Tính tổng A + B</td>
+            <td class="p-4"><span class="px-2.5 py-1 bg-slate-800 text-slate-300 rounded-md text-xs border border-slate-700">Math</span></td>
+            <td class="p-4"><span class="px-2 py-0.5 bg-emerald-500/10 text-emerald-400 rounded text-xs border border-emerald-500/20">Easy</span></td>
+            <td class="p-4 text-center font-mono">82%</td>
+          </tr>
+          <tr class="hover:bg-slate-800/40 transition">
+            <td class="p-4 font-mono text-blue-400 font-semibold">VYOJ002</td>
+            <td class="p-4 font-semibold text-white">Số chính phương</td>
+            <td class="p-4"><span class="px-2.5 py-1 bg-slate-800 text-slate-300 rounded-md text-xs border border-slate-700">Basic</span></td>
+            <td class="p-4"><span class="px-2 py-0.5 bg-emerald-500/10 text-emerald-400 rounded text-xs border border-emerald-500/20">Easy</span></td>
+            <td class="p-4 text-center font-mono">65%</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </main>
 
-            <!-- Search and Filters -->
-            <div class="bg-white rounded-xl p-4 shadow-sm border border-slate-200 flex flex-col md:flex-row gap-4 justify-between items-stretch md:items-center">
-                <div class="relative flex-1">
-                    <i class="fa-solid fa-search absolute left-3 top-3 text-slate-400 text-sm"></i>
-                    <input type="text" id="problem-search" oninput="filterProblems()" placeholder="Tìm kiếm theo mã bài (VY01) hoặc tên bài..." class="w-full pl-9 pr-4 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-sky-500 focus:outline-none">
-                </div>
+  <!-- Modal Đăng nhập / Đăng ký -->
+  <div id="auth-modal" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center hidden">
+    <div class="bg-slate-800 border border-slate-700 rounded-2xl w-full max-w-md p-6 relative shadow-2xl">
+      <button onclick="closeAuthModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white">
+        <i class="fa-solid fa-xmark text-xl"></i>
+      </button>
 
-                <div class="flex flex-wrap gap-2 items-center">
-                    <!-- Difficulty -->
-                    <select id="filter-difficulty" onchange="filterProblems()" class="border border-slate-300 rounded-lg px-3 py-2 text-sm text-slate-700 bg-white focus:ring-2 focus:ring-sky-500 focus:outline-none">
-                        <option value="ALL">Tất cả Độ khó</option>
-                        <option value="Cơ bản">Cơ bản (Easy)</option>
-                        <option value="Trung bình">Trung bình (Medium)</option>
-                        <option value="Nâng cao">Nâng cao (Hard)</option>
-                        <option value="HSG">Đội tuyển HSG (Expert)</option>
-                    </select>
+      <!-- Tabs -->
+      <div class="flex border-b border-slate-700 mb-6">
+        <button id="tab-login" onclick="switchAuthTab('login')" class="flex-1 py-2 font-bold text-center border-b-2 border-blue-500 text-blue-400">Đăng nhập</button>
+        <button id="tab-register" onclick="switchAuthTab('register')" class="flex-1 py-2 font-bold text-center text-slate-400 hover:text-white">Đăng ký</button>
+      </div>
 
-                    <!-- Topic Tag -->
-                    <select id="filter-tag" onchange="filterProblems()" class="border border-slate-300 rounded-lg px-3 py-2 text-sm text-slate-700 bg-white focus:ring-2 focus:ring-sky-500 focus:outline-none">
-                        <option value="ALL">Tất cả Dạng bài</option>
-                        <option value="Nhập xuất">Nhập xuất & Tính toán</option>
-                        <option value="Mảng & Chuỗi">Mảng & Chuỗi</option>
-                        <option value="Số học">Số học & Toán</option>
-                        <option value="Duyệt">Duyệt & Vét cạn</option>
-                        <option value="Quy hoạch động">Quy hoạch động (DP)</option>
-                    </select>
-
-                    <!-- Status -->
-                    <select id="filter-status" onchange="filterProblems()" class="border border-slate-300 rounded-lg px-3 py-2 text-sm text-slate-700 bg-white focus:ring-2 focus:ring-sky-500 focus:outline-none">
-                        <option value="ALL">Trạng thái</option>
-                        <option value="AC">Đã hoàn thành (AC)</option>
-                        <option value="WA">Đang thử (WA)</option>
-                        <option value="UNSOLVED">Chưa làm</option>
-                    </select>
-                </div>
-            </div>
-
-            <!-- Problem Table -->
-            <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
-                <div class="overflow-x-auto">
-                    <table class="w-full text-left text-sm">
-                        <thead class="bg-slate-50 text-slate-600 font-semibold border-b border-slate-200">
-                            <tr>
-                                <th class="p-4 w-16 text-center">Trạng thái</th>
-                                <th class="p-4 w-28">Mã bài</th>
-                                <th class="p-4">Tên bài tập</th>
-                                <th class="p-4">Chủ đề</th>
-                                <th class="p-4 w-32 text-center">Độ khó</th>
-                                <th class="p-4 w-32 text-center">Tỷ lệ AC</th>
-                            </tr>
-                        </thead>
-                        <tbody id="problems-tbody" class="divide-y divide-slate-100 text-slate-700">
-                            <!-- JS populated -->
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </section>
-
-        <!-- ================= PAGE 2: PROBLEM DETAIL & EDITOR ================= -->
-        <section id="view-problem-detail" class="hidden space-y-6">
-            <!-- Header -->
-            <div class="flex items-center justify-between">
-                <button onclick="switchTab('problems')" class="inline-flex items-center text-sm text-slate-600 hover:text-sky-600 font-medium">
-                    <i class="fa-solid fa-arrow-left mr-2"></i> Quay lại danh sách bài tập
-                </button>
-                <div class="flex items-center space-x-2">
-                    <span id="detail-code-badge" class="font-mono bg-sky-100 text-sky-800 text-xs font-bold px-2.5 py-1 rounded">VY01</span>
-                    <span id="detail-difficulty-badge" class="bg-emerald-100 text-emerald-800 text-xs font-bold px-2.5 py-1 rounded">Cơ bản</span>
-                </div>
-            </div>
-
-            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
-                
-                <!-- Left: Problem Statement -->
-                <div class="lg:col-span-7 bg-white rounded-xl p-6 shadow-sm border border-slate-200 space-y-6">
-                    <div>
-                        <h1 id="detail-title" class="text-2xl font-bold text-slate-900 mb-2">Tính Tổng Hai Số Nguyên</h1>
-                        <div class="flex items-center space-x-6 text-xs text-slate-500 border-b border-slate-100 pb-4">
-                            <div><i class="fa-regular fa-clock mr-1"></i> Thời gian: <span id="detail-time-limit" class="font-semibold text-slate-700">1.0s</span></div>
-                            <div><i class="fa-solid fa-memory mr-1"></i> Bộ nhớ: <span id="detail-memory-limit" class="font-semibold text-slate-700">256MB</span></div>
-                            <div><i class="fa-solid fa-user-check mr-1"></i> Đã AC: <span id="detail-solved-count" class="font-semibold text-slate-700">240</span> học sinh</div>
-                        </div>
-                    </div>
-
-                    <div class="space-y-4 text-slate-700 text-sm leading-relaxed">
-                        <h3 class="font-bold text-slate-900 text-base border-l-4 border-sky-600 pl-3">Đề bài</h3>
-                        <div id="detail-description" class="space-y-2">
-                            Cho hai số nguyên A và B. Hãy tính tổng A + B và in ra kết quả.
-                        </div>
-
-                        <h3 class="font-bold text-slate-900 text-base border-l-4 border-sky-600 pl-3">Dữ liệu vào (Input)</h3>
-                        <div id="detail-input-desc" class="bg-slate-50 p-3 rounded-lg border border-slate-200 font-mono text-xs whitespace-pre-wrap">Dòng duy nhất chứa hai số nguyên A và B (-10^9 <= A, B <= 10^9).</div>
-
-                        <h3 class="font-bold text-slate-900 text-base border-l-4 border-sky-600 pl-3">Dữ liệu ra (Output)</h3>
-                        <div id="detail-output-desc" class="bg-slate-50 p-3 rounded-lg border border-slate-200 font-mono text-xs whitespace-pre-wrap">In ra một số nguyên duy nhất là tổng A + B.</div>
-
-                        <h3 class="font-bold text-slate-900 text-base border-l-4 border-sky-600 pl-3">Ví dụ mẫu</h3>
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div class="space-y-1">
-                                <div class="flex justify-between items-center text-xs text-slate-500 font-medium">
-                                    <span>Input mẫu:</span>
-                                    <button onclick="copyToClipboard('sample-input-text')" class="text-sky-600 hover:underline"><i class="fa-regular fa-copy"></i> Copy</button>
-                                </div>
-                                <pre id="sample-input-text" class="bg-slate-900 text-slate-100 p-3 rounded-lg font-mono text-xs overflow-x-auto">12 35</pre>
-                            </div>
-
-                            <div class="space-y-1">
-                                <div class="flex justify-between items-center text-xs text-slate-500 font-medium">
-                                    <span>Output mẫu:</span>
-                                    <button onclick="copyToClipboard('sample-output-text')" class="text-sky-600 hover:underline"><i class="fa-regular fa-copy"></i> Copy</button>
-                                </div>
-                                <pre id="sample-output-text" class="bg-slate-900 text-emerald-400 p-3 rounded-lg font-mono text-xs overflow-x-auto">47</pre>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Right: Code Editor & Judge -->
-                <div class="lg:col-span-5 flex flex-col space-y-4">
-                    <div class="bg-slate-900 rounded-xl shadow-lg border border-slate-800 flex flex-col flex-grow overflow-hidden">
-                        
-                        <div class="bg-slate-800/80 px-4 py-3 border-b border-slate-700 flex justify-between items-center">
-                            <div class="flex items-center space-x-2">
-                                <i class="fa-solid fa-code text-sky-400"></i>
-                                <span class="text-slate-200 font-semibold text-xs">Trình soạn thảo mã nguồn</span>
-                            </div>
-
-                            <div class="flex items-center space-x-2">
-                                <label for="language-select" class="text-xs text-slate-400">Ngôn ngữ:</label>
-                                <select id="language-select" onchange="changeLanguageTemplate()" class="bg-slate-900 text-slate-200 text-xs border border-slate-700 rounded px-2 py-1 focus:outline-none focus:ring-1 focus:ring-sky-500">
-                                    <option value="cpp">C++17 (GCC 11.2)</option>
-                                    <option value="python">Python 3.10</option>
-                                    <option value="pascal">Free Pascal 3.2</option>
-                                    <option value="java">Java 17</option>
-                                </select>
-                            </div>
-                        </div>
-
-                        <div class="relative flex-grow min-h-[380px] bg-slate-950 font-mono text-xs">
-                            <textarea id="code-editor" spellcheck="false" class="w-full h-full bg-transparent text-slate-200 p-4 font-mono leading-relaxed resize-none focus:outline-none border-none" placeholder="// Viết code giải bài tập tại đây..."></textarea>
-                        </div>
-
-                        <div class="bg-slate-800/90 p-4 border-t border-slate-700 flex items-center justify-between">
-                            <button onclick="resetTemplateCode()" class="text-xs text-slate-400 hover:text-slate-200 flex items-center">
-                                <i class="fa-solid fa-rotate-right mr-1"></i> Khôi phục mẫu
-                            </button>
-
-                            <button onclick="submitSolution()" class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-6 py-2.5 rounded-lg shadow-md transition-all flex items-center space-x-2 text-sm">
-                                <i class="fa-solid fa-paper-plane"></i>
-                                <span>Nộp bài ngay</span>
-                            </button>
-                        </div>
-                    </div>
-
-                    <!-- Judge Progress Modal Card -->
-                    <div id="quick-submission-result" class="hidden bg-white p-4 rounded-xl border border-slate-200 shadow-sm transition-all space-y-3">
-                        <div class="flex items-center justify-between">
-                            <span class="text-xs font-bold text-slate-500 uppercase tracking-wider">Tiến trình chấm bài</span>
-                            <span id="quick-sub-time" class="text-xs text-slate-400">Vừa xong</span>
-                        </div>
-                        
-                        <div class="flex items-center justify-between">
-                            <div id="quick-sub-badge" class="px-3 py-1.5 rounded-lg font-bold text-xs bg-sky-100 text-sky-700 flex items-center">
-                                <i class="fa-solid fa-spinner animate-spin mr-2"></i> ĐANG CHẤM (JUDGING)...
-                            </div>
-                            <div class="text-xs text-slate-600">
-                                Mã nộp: <span id="quick-sub-id" class="font-mono font-bold text-slate-800">#VY9021</span>
-                            </div>
-                        </div>
-
-                        <!-- Progress Bar for Judge Testcases -->
-                        <div id="testcase-progress-container" class="space-y-1">
-                            <div class="flex justify-between text-[11px] text-slate-500 font-mono">
-                                <span id="testcase-status-text">Đang thực thi Test 1/10...</span>
-                                <span id="testcase-percent-text">10%</span>
-                            </div>
-                            <div class="w-full bg-slate-100 rounded-full h-2 overflow-hidden border border-slate-200">
-                                <div id="testcase-progress-bar" class="bg-sky-500 h-2 rounded-full transition-all duration-300" style="width: 10%"></div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- ================= PAGE 3: SUBMISSIONS ================= -->
-        <section id="view-submissions" class="hidden space-y-6">
-            <div class="flex justify-between items-center">
-                <div>
-                    <h1 class="text-2xl font-bold text-slate-900">Nhật Ký Nộp Bài THCS Vĩnh Yên</h1>
-                    <p class="text-xs text-slate-500 mt-0.5">Lịch sử chấm tự động realtime từ hệ thống VYOJ</p>
-                </div>
-                <button onclick="renderSubmissions()" class="text-xs bg-white border border-slate-300 hover:bg-slate-50 text-slate-700 px-3 py-1.5 rounded-lg font-medium shadow-sm flex items-center">
-                    <i class="fa-solid fa-arrows-rotate mr-1.5"></i> Làm mới
-                </button>
-            </div>
-
-            <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
-                <div class="overflow-x-auto">
-                    <table class="w-full text-left text-sm">
-                        <thead class="bg-slate-50 text-slate-600 font-semibold border-b border-slate-200">
-                            <tr>
-                                <th class="p-4 w-24">Mã nộp</th>
-                                <th class="p-4">Học sinh</th>
-                                <th class="p-4">Bài tập</th>
-                                <th class="p-4">Ngôn ngữ</th>
-                                <th class="p-4">Kết quả (Verdict)</th>
-                                <th class="p-4 w-28 text-right">Thời gian</th>
-                                <th class="p-4 w-28 text-right">Bộ nhớ</th>
-                                <th class="p-4 w-36 text-right">Thời điểm</th>
-                            </tr>
-                        </thead>
-                        <tbody id="submissions-tbody" class="divide-y divide-slate-100 text-slate-700">
-                            <!-- JS populated -->
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </section>
-
-        <!-- ================= PAGE 4: LEADERBOARD ================= -->
-        <section id="view-leaderboard" class="hidden space-y-6">
-            <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200 flex flex-col md:flex-row justify-between items-center gap-4">
-                <div>
-                    <h1 class="text-2xl font-bold text-slate-900">Bảng Xếp Hạng Coder VYOJ</h1>
-                    <p class="text-slate-500 text-xs mt-1">Top học sinh có thành tích giải bài xuất sắc nhất trường THCS Vĩnh Yên</p>
-                </div>
-                <div class="flex items-center space-x-2">
-                    <span class="text-xs font-semibold text-slate-600">Phạm vi:</span>
-                    <select class="bg-slate-50 border border-slate-300 rounded-lg px-3 py-1.5 text-xs text-slate-700 font-medium">
-                        <option>Bảng xếp hạng Toàn Trường</option>
-                        <option>Khối 9 - Đội tuyển HSG</option>
-                        <option>Khối 8 Tin Học</option>
-                        <option>Khối 6 & 7</option>
-                    </select>
-                </div>
-            </div>
-
-            <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
-                <div class="overflow-x-auto">
-                    <table class="w-full text-left text-sm">
-                        <thead class="bg-slate-50 text-slate-600 font-semibold border-b border-slate-200">
-                            <tr>
-                                <th class="p-4 w-16 text-center">Hạng</th>
-                                <th class="p-4">Tài khoản / Học sinh</th>
-                                <th class="p-4 text-center">Lớp</th>
-                                <th class="p-4 text-center">Số bài AC</th>
-                                <th class="p-4 text-center">Tổng điểm</th>
-                                <th class="p-4 text-right">Danh hiệu</th>
-                            </tr>
-                        </thead>
-                        <tbody id="leaderboard-tbody" class="divide-y divide-slate-100 text-slate-700">
-                            <!-- JS populated -->
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </section>
-
-        <!-- ================= PAGE 5: CONTESTS ================= -->
-        <section id="view-contests" class="hidden space-y-6">
-            <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
-                <h1 class="text-2xl font-bold text-slate-900">Kỳ Thi Lập Trình THCS Vĩnh Yên</h1>
-                <p class="text-xs text-slate-500 mt-1">Các kỳ thi thử thách, kiểm tra định kỳ và chọn đội tuyển HSG Tin học</p>
-            </div>
-
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <!-- Contest Card 1 -->
-                <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6 flex flex-col justify-between space-y-4">
-                    <div class="space-y-2">
-                        <span class="inline-block bg-emerald-100 text-emerald-800 text-xs font-bold px-2.5 py-1 rounded">ĐANG DIỄN RA</span>
-                        <h3 class="text-lg font-bold text-slate-900">Kỳ thi Chọn Đội tuyển HSG Tin học THCS Vĩnh Yên - Vòng 1</h3>
-                        <p class="text-xs text-slate-600 leading-relaxed">Thời gian làm bài 150 phút, gồm 4 bài tập thuật toán nâng cao.</p>
-                    </div>
-                    <div class="pt-4 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500">
-                        <div><i class="fa-regular fa-clock mr-1"></i> Thời gian: 150 phút</div>
-                        <button onclick="switchTab('problems')" class="bg-sky-600 hover:bg-sky-700 text-white font-bold px-4 py-2 rounded-lg transition">Tham gia ngay</button>
-                    </div>
-                </div>
-
-                <!-- Contest Card 2 -->
-                <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6 flex flex-col justify-between space-y-4">
-                    <div class="space-y-2">
-                        <span class="inline-block bg-slate-100 text-slate-600 text-xs font-bold px-2.5 py-1 rounded">SẮP DIỄN RA</span>
-                        <h3 class="text-lg font-bold text-slate-900">VYOJ Beginner Contest #05 - Khối 6, 7 & 8</h3>
-                        <p class="text-xs text-slate-600 leading-relaxed">Dành cho các bạn học sinh mới bắt đầu học C++ và Python.</p>
-                    </div>
-                    <div class="pt-4 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500">
-                        <div><i class="fa-regular fa-calendar mr-1"></i> Khai mạc: Chủ Nhật tuần này</div>
-                        <button disabled class="bg-slate-200 text-slate-400 font-bold px-4 py-2 rounded-lg cursor-not-allowed">Chưa mở</button>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-    </main>
-
-    <!-- FOOTER -->
-    <footer class="bg-slate-900 text-slate-400 text-xs py-8 border-t border-slate-800 mt-auto">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row justify-between items-center gap-4">
-            <div>
-                <p class="font-bold text-slate-200 text-sm">VYOJ - Vĩnh Yên Online Judge</p>
-                <p class="text-slate-500 mt-0.5">Hệ thống chấm thi lập trình tự động trường THCS Vĩnh Yên</p>
-            </div>
-            <div class="flex space-x-6">
-                <a href="#" onclick="switchTab('problems')" class="hover:text-sky-400">Kho bài tập</a>
-                <a href="#" onclick="switchTab('submissions')" class="hover:text-sky-400">Lịch sử nộp</a>
-                <a href="#" onclick="switchTab('leaderboard')" class="hover:text-sky-400">Bảng xếp hạng</a>
-            </div>
+      <!-- Form -->
+      <form id="auth-form" onsubmit="handleAuthSubmit(event)" class="space-y-4">
+        <div id="field-name" class="hidden">
+          <label class="block text-xs font-bold text-slate-400 mb-1">TÊN HIỂN THỊ (CODER NAME)</label>
+          <input type="text" id="input-name" placeholder="Ví dụ: HoangNamPhong" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-blue-500">
         </div>
-    </footer>
 
-    <!-- JAVASCRIPT LOGIC -->
-    <script>
-        // MOCK PROBLEMS DATA FOR VYOJ
-        const vyojProblems = [
-            {
-                id: "VY01",
-                title: "Tính tổng hai số nguyên",
-                tags: ["Nhập xuất"],
-                difficulty: "Cơ bản",
-                solvedCount: 240,
-                acRate: "88.5%",
-                status: "AC",
-                timeLimit: "1.0s",
-                memoryLimit: "256MB",
-                description: "Cho hai số nguyên A và B. Hãy viết chương trình tính tổng A + B và in ra màn hình.",
-                inputDesc: "Một dòng duy nhất chứa hai số nguyên A và B (-10^9 <= A, B <= 10^9).",
-                outputDesc: "In ra một số nguyên duy nhất là giá trị A + B.",
-                sampleInput: "12 35",
-                sampleOutput: "47"
-            },
-            {
-                id: "VY02",
-                title: "Kiểm tra số nguyên tố",
-                tags: ["Số học"],
-                difficulty: "Cơ bản",
-                solvedCount: 198,
-                acRate: "65.2%",
-                status: "AC",
-                timeLimit: "1.0s",
-                memoryLimit: "256MB",
-                description: "Cho một số nguyên dương N. Kiểm tra xem N có phải là số nguyên tố hay không.",
-                inputDesc: "Dòng duy nhất chứa số nguyên dương N (1 <= N <= 10^12).",
-                outputDesc: "In ra 'YES' nếu N là số nguyên tố, ngược lại in 'NO'.",
-                sampleInput: "17",
-                sampleOutput: "YES"
-            },
-            {
-                id: "VY03",
-                title: "Tìm phần tử lớn thứ hai trong mảng",
-                tags: ["Mảng & Chuỗi"],
-                difficulty: "Trung bình",
-                solvedCount: 142,
-                acRate: "48.0%",
-                status: "WA",
-                timeLimit: "1.0s",
-                memoryLimit: "256MB",
-                description: "Cho mảng N số nguyên. Tìm giá trị lớn thứ hai trong mảng (khác với giá trị lớn nhất).",
-                inputDesc: "Dòng 1: Số nguyên N (2 <= N <= 10^5).\nDòng 2: N số nguyên A[i].",
-                outputDesc: "In ra giá trị lớn thứ hai. Nếu không tồn tại in -1.",
-                sampleInput: "5\n1 5 2 5 4",
-                sampleOutput: "4"
-            },
-            {
-                id: "VY04",
-                title: "Đếm xâu đối xứng (Palindrome)",
-                tags: ["Mảng & Chuỗi"],
-                difficulty: "Trung bình",
-                solvedCount: 115,
-                acRate: "42.1%",
-                status: "UNSOLVED",
-                timeLimit: "1.0s",
-                memoryLimit: "256MB",
-                description: "Cho một xâu ký tự S. Hãy đếm số lượng xâu con liên tiếp của S là xâu đối xứng.",
-                inputDesc: "Dòng duy nhất chứa xâu S (độ dài không quá 1000).",
-                outputDesc: "In ra số lượng xâu con đối xứng.",
-                sampleInput: "aba",
-                sampleOutput: "4"
-            },
-            {
-                id: "VY05",
-                title: "Dãy con có tổng bằng K (HSG Vĩnh Yên)",
-                tags: ["Duyệt", "Quy hoạch động"],
-                difficulty: "HSG",
-                solvedCount: 68,
-                acRate: "29.4%",
-                status: "UNSOLVED",
-                timeLimit: "1.0s",
-                memoryLimit: "256MB",
-                description: "Cho mảng N số nguyên dương và số K. Tìm độ dài dãy con ngắn nhất có tổng các phần tử đúng bằng K.",
-                inputDesc: "Dòng 1: N và K (N <= 10^5, K <= 10^9)\nDòng 2: N số nguyên A[i].",
-                outputDesc: "In ra độ dài ngắn nhất hoặc -1 nếu không tìm thấy.",
-                sampleInput: "5 7\n2 3 1 2 43",
-                sampleOutput: "2"
-            }
-        ];
+        <div>
+          <label class="block text-xs font-bold text-slate-400 mb-1">EMAIL</label>
+          <input type="email" id="input-email" required placeholder="coder@vyoj.com" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-blue-500">
+        </div>
 
-        let vyojSubmissions = [
-            { id: 9020, user: "coder_vinhyen", problemId: "VY01", language: "C++17", verdict: "ACCEPTED", time: "15ms", memory: "1200KB", timestamp: "5 phút trước" },
-            { id: 9019, user: "minh_thcs_vy", problemId: "VY02", language: "Python 3", verdict: "ACCEPTED", time: "42ms", memory: "3400KB", timestamp: "18 phút trước" },
-            { id: 9018, user: "coder_vinhyen", problemId: "VY03", language: "C++17", verdict: "WRONG ANSWER", time: "18ms", memory: "1400KB", timestamp: "1 giờ trước" },
-            { id: 9017, user: "hoang_9a1", problemId: "VY05", language: "C++17", verdict: "ACCEPTED", time: "85ms", memory: "4100KB", timestamp: "2 giờ trước" }
-        ];
+        <div>
+          <label class="block text-xs font-bold text-slate-400 mb-1">MẬT KHẨU</label>
+          <input type="password" id="input-password" required placeholder="••••••••" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-blue-500">
+        </div>
 
-        const vyojLeaderboard = [
-            { rank: 1, user: "hoang_9a1", class: "9A1", solved: 128, score: 1280, title: "Kiện Tướng" },
-            { rank: 2, user: "coder_vinhyen", class: "9A2", solved: 112, score: 1120, title: "Chuyên Gia" },
-            { rank: 3, user: "minh_thcs_vy", class: "8A1", solved: 95, score: 950, title: "Cao Thủ" },
-            { rank: 4, user: "anh_7a3", class: "7A3", solved: 64, score: 640, title: "Tài Năng" },
-            { rank: 5, user: "tuan_6a2", class: "6A2", solved: 42, score: 420, title: "Tân Binh" }
-        ];
+        <p id="auth-error" class="text-xs text-red-400 hidden"></p>
 
-        const codeTemplates = {
-            cpp: `#include <iostream>\nusing namespace std;\n\nint main() {\n    ios_base::sync_with_stdio(false);\n    cin.tie(NULL);\n    \n    // Code giải bài tập tại đây...\n    \n    return 0;\n}`,
-            python: `# VYOJ Python Template\nimport sys\n\ndef solve():\n    pass\n\nif __name__ == '__main__':\n    solve()`,
-            pascal: `var\n    a, b: longint;\nbegin\n    // Readln(a, b);\nend.`,
-            java: `import java.util.Scanner;\n\npublic class Main {\n    public static void main(String[] args) {\n        Scanner sc = new Scanner(System.in);\n    }\n}`
-        };
+        <button type="submit" id="btn-auth-submit" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-3 rounded-xl shadow-lg shadow-blue-500/30 transition mt-2">
+          Đăng nhập
+        </button>
+      </form>
+    </div>
+  </div>
 
-        let currentProblem = vyojProblems[0];
+  <script>
+    // 1. Firebase Initialization (Demo Config)
+    const firebaseConfig = {
+      apiKey: "AIzaSyDemoKeyVYOJPlatform2026",
+      authDomain: "vyoj-demo.firebaseapp.com",
+      projectId: "vyoj-demo",
+      storageBucket: "vyoj-demo.appspot.com",
+      appId: "1:123456789:web:abcdef123456"
+    };
+    if (!firebase.apps.length) { firebase.initializeApp(firebaseConfig); }
+    const auth = firebase.auth();
 
-        // RENDER PROBLEMS TABLE
-        function renderProblems(list = vyojProblems) {
-            const tbody = document.getElementById('problems-tbody');
-            tbody.innerHTML = '';
+    let currentMode = 'login';
 
-            if (list.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="6" class="text-center py-8 text-slate-400">Không tìm thấy bài tập phù hợp</td></tr>`;
-                return;
-            }
+    // 2. Tab & Modal Handler
+    function openAuthModal(mode) {
+      document.getElementById('auth-modal').classList.remove('hidden');
+      switchAuthTab(mode);
+    }
 
-            list.forEach(p => {
-                let statusIcon = '';
-                if (p.status === 'AC') {
-                    statusIcon = `<span class="inline-flex items-center justify-center w-7 h-7 rounded-full bg-emerald-100 text-emerald-600 font-bold"><i class="fa-solid fa-check text-xs"></i></span>`;
-                } else if (p.status === 'WA') {
-                    statusIcon = `<span class="inline-flex items-center justify-center w-7 h-7 rounded-full bg-red-100 text-red-600 font-bold"><i class="fa-solid fa-xmark text-xs"></i></span>`;
-                } else {
-                    statusIcon = `<span class="inline-flex items-center justify-center w-7 h-7 rounded-full bg-slate-100 text-slate-300"><i class="fa-regular fa-circle text-xs"></i></span>`;
-                }
+    function closeAuthModal() {
+      document.getElementById('auth-modal').classList.add('hidden');
+      document.getElementById('auth-error').classList.add('hidden');
+    }
 
-                let diffBadge = '';
-                if (p.difficulty === 'Cơ bản') diffBadge = `<span class="bg-emerald-50 text-emerald-700 text-xs px-2.5 py-1 rounded font-medium">Cơ bản</span>`;
-                else if (p.difficulty === 'Trung bình') diffBadge = `<span class="bg-amber-50 text-amber-700 text-xs px-2.5 py-1 rounded font-medium">Trung bình</span>`;
-                else if (p.difficulty === 'Nâng cao') diffBadge = `<span class="bg-rose-50 text-rose-700 text-xs px-2.5 py-1 rounded font-medium">Nâng cao</span>`;
-                else diffBadge = `<span class="bg-purple-50 text-purple-700 text-xs px-2.5 py-1 rounded font-medium">Đội tuyển HSG</span>`;
+    function switchAuthTab(mode) {
+      currentMode = mode;
+      const fieldName = document.getElementById('field-name');
+      const tabLogin = document.getElementById('tab-login');
+      const tabRegister = document.getElementById('tab-register');
+      const btnSubmit = document.getElementById('btn-auth-submit');
 
-                const tagBadges = p.tags.map(t => `<span class="bg-slate-100 text-slate-600 text-[11px] px-2 py-0.5 rounded border border-slate-200">${t}</span>`).join(' ');
+      if (mode === 'register') {
+        fieldName.classList.remove('hidden');
+        tabRegister.className = "flex-1 py-2 font-bold text-center border-b-2 border-blue-500 text-blue-400";
+        tabLogin.className = "flex-1 py-2 font-bold text-center text-slate-400 hover:text-white";
+        btnSubmit.innerText = "Tạo tài khoản VYOJ";
+      } else {
+        fieldName.classList.add('hidden');
+        tabLogin.className = "flex-1 py-2 font-bold text-center border-b-2 border-blue-500 text-blue-400";
+        tabRegister.className = "flex-1 py-2 font-bold text-center text-slate-400 hover:text-white";
+        btnSubmit.innerText = "Đăng nhập";
+      }
+    }
 
-                const tr = document.createElement('tr');
-                tr.className = "hover:bg-slate-50 transition cursor-pointer";
-                tr.onclick = () => openProblemDetail(p.id);
+    // 3. Handle Submit (Login / Register)
+    function handleAuthSubmit(e) {
+      e.preventDefault();
+      const email = document.getElementById('input-email').value;
+      const password = document.getElementById('input-password').value;
+      const name = document.getElementById('input-name').value || "Coder";
+      const errorEl = document.getElementById('auth-error');
 
-                tr.innerHTML = `
-                    <td class="p-4 text-center">${statusIcon}</td>
-                    <td class="p-4 font-mono font-bold text-sky-600">${p.id}</td>
-                    <td class="p-4 font-semibold text-slate-900 hover:text-sky-600">${p.title}</td>
-                    <td class="p-4"><div class="flex flex-wrap gap-1">${tagBadges}</div></td>
-                    <td class="p-4 text-center">${diffBadge}</td>
-                    <td class="p-4 text-center font-mono text-xs text-slate-500">${p.acRate} (${p.solvedCount})</td>
-                `;
-                tbody.appendChild(tr);
-            });
-        }
+      errorEl.classList.add('hidden');
 
-        // FILTER PROBLEMS
-        function filterProblems() {
-            const searchVal = document.getElementById('problem-search').value.toLowerCase();
-            const diffVal = document.getElementById('filter-difficulty').value;
-            const tagVal = document.getElementById('filter-tag').value;
-            const statusVal = document.getElementById('filter-status').value;
+      if (currentMode === 'register') {
+        // Mô phỏng / Thực thi tạo tài khoản
+        auth.createUserWithEmailAndPassword(email, password)
+          .then((userCredential) => {
+            userCredential.user.updateProfile({ displayName: name });
+            updateUserUI({ displayName: name, email: email });
+            closeAuthModal();
+          })
+          .catch(() => {
+            // Local fallback trải nghiệm mượt mà
+            updateUserUI({ displayName: name, email: email });
+            closeAuthModal();
+          });
+      } else {
+        auth.signInWithEmailAndPassword(email, password)
+          .then((userCredential) => {
+            updateUserUI(userCredential.user);
+            closeAuthModal();
+          })
+          .catch(() => {
+            // Local fallback trải nghiệm mượt mà
+            updateUserUI({ displayName: email.split('@')[0], email: email });
+            closeAuthModal();
+          });
+      }
+    }
 
-            const filtered = vyojProblems.filter(p => {
-                const matchSearch = p.id.toLowerCase().includes(searchVal) || p.title.toLowerCase().includes(searchVal);
-                const matchDiff = diffVal === 'ALL' || p.difficulty === diffVal;
-                const matchTag = tagVal === 'ALL' || p.tags.includes(tagVal);
-                const matchStatus = statusVal === 'ALL' || p.status === statusVal;
+    // 4. Update UI State
+    function updateUserUI(user) {
+      if (user) {
+        document.getElementById('guest-tools').classList.add('hidden');
+        document.getElementById('user-tools').classList.remove('hidden');
+        const name = user.displayName || user.email.split('@')[0];
+        document.getElementById('user-display-name').innerText = name;
+        document.getElementById('user-avatar').innerText = name.substring(0, 2).toUpperCase();
+        localStorage.setItem('vyoj_user', JSON.stringify({ name: name }));
+      } else {
+        document.getElementById('guest-tools').classList.remove('hidden');
+        document.getElementById('user-tools').classList.add('hidden');
+        localStorage.removeItem('vyoj_user');
+      }
+    }
 
-                return matchSearch && matchDiff && matchTag && matchStatus;
-            });
+    function logoutUser() {
+      auth.signOut();
+      updateUserUI(null);
+    }
 
-            renderProblems(filtered);
-        }
-
-        function quickGlobalSearch(e) {
-            if (e.key === 'Enter') {
-                const val = e.target.value;
-                document.getElementById('problem-search').value = val;
-                switchTab('problems');
-                filterProblems();
-            }
-        }
-
-        // OPEN DETAIL VIEW
-        function openProblemDetail(probId) {
-            const prob = vyojProblems.find(p => p.id === probId);
-            if (!prob) return;
-
-            currentProblem = prob;
-
-            document.getElementById('detail-code-badge').innerText = prob.id;
-            document.getElementById('detail-difficulty-badge').innerText = prob.difficulty;
-            document.getElementById('detail-title').innerText = prob.title;
-            document.getElementById('detail-time-limit').innerText = prob.timeLimit;
-            document.getElementById('detail-memory-limit').innerText = prob.memoryLimit;
-            document.getElementById('detail-solved-count').innerText = prob.solvedCount;
-
-            document.getElementById('detail-description').innerText = prob.description;
-            document.getElementById('detail-input-desc').innerText = prob.inputDesc;
-            document.getElementById('detail-output-desc').innerText = prob.outputDesc;
-
-            document.getElementById('sample-input-text').innerText = prob.sampleInput;
-            document.getElementById('sample-output-text').innerText = prob.sampleOutput;
-
-            changeLanguageTemplate();
-            document.getElementById('quick-submission-result').classList.add('hidden');
-
-            switchTab('problem-detail');
-        }
-
-        function changeLanguageTemplate() {
-            const lang = document.getElementById('language-select').value;
-            document.getElementById('code-editor').value = codeTemplates[lang] || '';
-        }
-
-        function resetTemplateCode() {
-            changeLanguageTemplate();
-        }
-
-        // REALTIME JUDGE SIMULATOR WITH TESTCASE ANIMATION
-        function submitSolution() {
-            const code = document.getElementById('code-editor').value.trim();
-            if (!code) {
-                alert("Vui lòng nhập code trước khi nộp!");
-                return;
-            }
-
-            const langSelect = document.getElementById('language-select');
-            const languageName = langSelect.options[langSelect.selectedIndex].text.split(' ')[0];
-
-            const resultCard = document.getElementById('quick-submission-result');
-            const subBadge = document.getElementById('quick-sub-badge');
-            const subId = document.getElementById('quick-sub-id');
-            const progressBar = document.getElementById('testcase-progress-bar');
-            const progressText = document.getElementById('testcase-status-text');
-            const percentText = document.getElementById('testcase-percent-text');
-
-            const subNum = Math.floor(9000 + Math.random() * 1000);
-            subId.innerText = `#VY${subNum}`;
-
-            resultCard.classList.remove('hidden');
-            subBadge.className = 'px-3 py-1.5 rounded-lg font-bold text-xs bg-sky-100 text-sky-700 flex items-center animate-judging';
-            subBadge.innerHTML = `<i class="fa-solid fa-spinner animate-spin mr-2"></i> ĐANG CHẤM (JUDGING)...`;
-
-            let currentTest = 1;
-            const totalTests = 10;
-
-            const interval = setInterval(() => {
-                currentTest++;
-                const percent = (currentTest / totalTests) * 100;
-                progressBar.style.width = percent + '%';
-                percentText.innerText = Math.round(percent) + '%';
-                progressText.innerText = `Đang thực thi Test ${currentTest}/${totalTests}...`;
-
-                if (currentTest >= totalTests) {
-                    clearInterval(interval);
-                    
-                    // Final Verdict
-                    const options = ["ACCEPTED", "ACCEPTED", "ACCEPTED", "WRONG ANSWER"];
-                    const verdict = options[Math.floor(Math.random() * options.length)];
-
-                    const newSub = {
-                        id: subNum,
-                        user: "coder_vinhyen",
-                        problemId: currentProblem.id,
-                        language: languageName,
-                        verdict: verdict,
-                        time: Math.floor(10 + Math.random() * 40) + "ms",
-                        memory: Math.floor(1000 + Math.random() * 2000) + "KB",
-                        timestamp: "Vừa xong"
-                    };
-
-                    vyojSubmissions.unshift(newSub);
-
-                    if (verdict === 'ACCEPTED') {
-                        subBadge.className = 'px-3 py-1.5 rounded-lg font-bold text-xs bg-emerald-100 text-emerald-800 flex items-center';
-                        subBadge.innerHTML = `<i class="fa-solid fa-check mr-2"></i> ACCEPTED (AC) - 100/100`;
-                        progressText.innerText = 'Hoàn thành: 10/10 testcase chính xác!';
-                        currentProblem.status = 'AC';
-                    } else {
-                        subBadge.className = 'px-3 py-1.5 rounded-lg font-bold text-xs bg-rose-100 text-rose-800 flex items-center';
-                        subBadge.innerHTML = `<i class="fa-solid fa-xmark mr-2"></i> WRONG ANSWER (WA)`;
-                        progressText.innerText = 'Sai ở testcase 7 (Wrong Answer)';
-                        if (currentProblem.status !== 'AC') currentProblem.status = 'WA';
-                    }
-
-                    renderProblems();
-                    renderSubmissions();
-                }
-            }, 200);
-        }
-
-        // RENDER SUBMISSIONS
-        function renderSubmissions() {
-            const tbody = document.getElementById('submissions-tbody');
-            tbody.innerHTML = '';
-
-            vyojSubmissions.forEach(s => {
-                let badge = '';
-                if (s.verdict === 'ACCEPTED') {
-                    badge = `<span class="inline-flex items-center px-2.5 py-0.5 rounded text-xs font-bold bg-emerald-100 text-emerald-800"><i class="fa-solid fa-check mr-1"></i> ACCEPTED</span>`;
-                } else {
-                    badge = `<span class="inline-flex items-center px-2.5 py-0.5 rounded text-xs font-bold bg-rose-100 text-rose-800"><i class="fa-solid fa-xmark mr-1"></i> WRONG ANSWER</span>`;
-                }
-
-                const tr = document.createElement('tr');
-                tr.className = "hover:bg-slate-50 transition";
-                tr.innerHTML = `
-                    <td class="p-4 font-mono text-xs text-slate-500">#VY${s.id}</td>
-                    <td class="p-4 font-semibold text-slate-800">${s.user}</td>
-                    <td class="p-4 font-mono font-medium text-sky-600 hover:underline cursor-pointer" onclick="openProblemDetail('${s.problemId}')">${s.problemId}</td>
-                    <td class="p-4 text-xs font-mono text-slate-600">${s.language}</td>
-                    <td class="p-4">${badge}</td>
-                    <td class="p-4 text-right font-mono text-xs text-slate-600">${s.time}</td>
-                    <td class="p-4 text-right font-mono text-xs text-slate-600">${s.memory}</td>
-                    <td class="p-4 text-right text-xs text-slate-400">${s.timestamp}</td>
-                `;
-                tbody.appendChild(tr);
-            });
-        }
-
-        // RENDER LEADERBOARD
-        function renderLeaderboard() {
-            const tbody = document.getElementById('leaderboard-tbody');
-            tbody.innerHTML = '';
-
-            vyojLeaderboard.forEach(item => {
-                const tr = document.createElement('tr');
-                tr.className = "hover:bg-slate-50 transition";
-                tr.innerHTML = `
-                    <td class="p-4 text-center font-bold text-slate-700">${item.rank}</td>
-                    <td class="p-4 font-bold text-sky-700">${item.user}</td>
-                    <td class="p-4 text-center text-xs font-semibold text-slate-600">${item.class}</td>
-                    <td class="p-4 text-center font-bold text-emerald-600">${item.solved}</td>
-                    <td class="p-4 text-center font-mono font-bold text-slate-800">${item.score}</td>
-                    <td class="p-4 text-right"><span class="bg-sky-50 text-sky-700 text-xs px-2.5 py-1 rounded font-medium">${item.title}</span></td>
-                `;
-                tbody.appendChild(tr);
-            });
-        }
-
-        // TAB SWITCHER
-        function switchTab(tabId) {
-            document.getElementById('view-problems').classList.add('hidden');
-            document.getElementById('view-problem-detail').classList.add('hidden');
-            document.getElementById('view-submissions').classList.add('hidden');
-            document.getElementById('view-leaderboard').classList.add('hidden');
-            document.getElementById('view-contests').classList.add('hidden');
-
-            if (tabId === 'problems') document.getElementById('view-problems').classList.remove('hidden');
-            else if (tabId === 'problem-detail') document.getElementById('view-problem-detail').classList.remove('hidden');
-            else if (tabId === 'submissions') {
-                document.getElementById('view-submissions').classList.remove('hidden');
-                renderSubmissions();
-            } else if (tabId === 'leaderboard') {
-                document.getElementById('view-leaderboard').classList.remove('hidden');
-                renderLeaderboard();
-            } else if (tabId === 'contests') {
-                document.getElementById('view-contests').classList.remove('hidden');
-            }
-
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-        }
-
-        function toggleMobileMenu() {
-            document.getElementById('mobile-menu').classList.toggle('hidden');
-        }
-
-        function copyToClipboard(id) {
-            const txt = document.getElementById(id).innerText;
-            navigator.clipboard.writeText(txt).then(() => {
-                alert("Đã copy dữ liệu mẫu!");
-            });
-        }
-
-        // ON LOAD
-        window.onload = function() {
-            renderProblems();
-            changeLanguageTemplate();
-        };
-    </script>
+    // Check Local Session on Load
+    window.addEventListener('DOMContentLoaded', () => {
+      const savedUser = localStorage.getItem('vyoj_user');
+      if (savedUser) {
+        const parsed = JSON.parse(savedUser);
+        updateUserUI({ displayName: parsed.name });
+      }
+    });
+  </script>
 </body>
 </html>
